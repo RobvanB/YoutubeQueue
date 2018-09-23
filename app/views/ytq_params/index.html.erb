@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Ytq Params</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Last date (UTC)</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @ytq_params.each do |ytq_param| %>
+      <tr>
+        <td><%= ytq_param.last_date %></td>
+        <td><%= link_to 'Show', ytq_param %></td>
+        <td><%= link_to 'Edit', edit_ytq_param_path(ytq_param) %></td>
+        <td><%= link_to 'Destroy', ytq_param, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Ytq Param', new_ytq_param_path %>

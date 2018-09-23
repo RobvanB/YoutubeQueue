@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Videos</h1>
+
+<%= link_to 'Home', videos_path %>
+<%= link_to 'Load latest videos', pull_path %>
+<%= link_to 'Check/set last date', ytq_params_path %>
+<br>
+<%= link_to 'New Video', new_video_path %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Channel</th>
+      <th>Date Published</th>
+      <th>Title</th>
+      <th>Url</th>
+      <th>Watched</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @videos.each do |video| %>
+      <tr>
+        <td><%= video.channel %></td>
+        <td><%= video.published %></td>
+        <td><%= video.title %></td>
+        <td><%= link_to("WATCH", video.url, target: :_blank) %>
+        <td><%= video.watched %></td>
+        <td><%= link_to 'Show', video %></td>
+        <td><%= link_to 'Edit', edit_video_path(video) %></td>
+        <td><%= link_to 'Destroy', video, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
