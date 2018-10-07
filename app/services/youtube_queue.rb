@@ -9,6 +9,8 @@ class YoutubeQueue
   require 'googleauth/stores/file_token_store'
 
   require 'fileutils'
+
+  #include Datagrid
   
   # REPLACE WITH VALID REDIRECT_URI FOR YOUR CLIENT
   REDIRECT_URI = 'http://localhost'

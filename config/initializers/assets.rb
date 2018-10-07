@@ -12,3 +12,13 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # application.js, application.css, and all non-JS/CSS in the app/assets
 # folder are already added.
 # Rails.application.config.assets.precompile += %w( admin.js admin.css )
+
+# Added by RvB for DHTMLXGrid
+Rails.application.config.assets.precompile += %w( dhtmlxgrid.css )
+Rails.application.config.assets.precompile += %w( skins/dhtmlxgrid_dhx_skyblue.css )
+Rails.application.config.assets.precompile += %w( dhtmlxcommon.js )
+Rails.application.config.assets.precompile += %w( dhtmlxgrid.js )
+#Rails.application.config.assets.precompile += %w( dhtmlxgridcell.js )
+Rails.application.config.assets.precompile += %w( dhtmlxdataprocessor.js )
+Rails.application.config.assets.precompile += %w( ext/dhtmlxgrid_filter.js )
+
