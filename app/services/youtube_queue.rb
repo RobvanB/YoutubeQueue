@@ -7,20 +7,16 @@ class YoutubeQueue
   require 'googleauth/stores/file_token_store'
   require 'fileutils'
  
-  # REPLACE WITH VALID REDIRECT_URI FOR YOUR CLIENT
-  REDIRECT_URI = 'http://localhost:3000/set_token'
-  APPLICATION_NAME = 'YouTube Data API Ruby Tests'
-
-  # REPLACE WITH NAME/LOCATION OF YOUR client_secrets.json FILE
+  # VALID REDIRECT_URI FOR YOUR CLIENT
+  REDIRECT_URI        = 'http://localhost:3000/set_token'
+  APPLICATION_NAME    = 'YoutubeQueue'
+  # NAME/LOCATION OF YOUR client_secrets.json FILE
   CLIENT_SECRETS_PATH = 'client_secret_Oauth2_Ruby.json'
-
-  # REPLACE FINAL ARGUMENT WITH FILE WHERE CREDENTIALS WILL BE STORED
-  CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
-                               "youtube-ruby-snippet-tests.yaml")
+  # WHERE CREDENTIALS WILL BE STORED
+  CREDENTIALS_PATH    = File.join(Dir.home, '.credentials',"YoutubeQueue.yaml")
 
   # SCOPE FOR WHICH THIS SCRIPT REQUESTS AUTHORIZATION
   SCOPE = Google::Apis::YoutubeV3::AUTH_YOUTUBE_FORCE_SSL
-
 
   def initialize
     # Initialize the API
@@ -36,7 +32,7 @@ class YoutubeQueue
 
   def get_videos(credentials)
     @service.authorization = credentials
-    #Get the last time the videos were pulled
+    # Get the last time the videos were pulled
     ytq_param = YtqParam.first  # There will be/should be only 1 record
     if ytq_param.nil? || ytq_param.last_date.nil?
       last_check_date = '2018-08-10T00:00:00Z'  #'2018-08-10T00:00:00Z' Initial start date
@@ -52,13 +48,12 @@ class YoutubeQueue
       sub_channel_title = sub.snippet.title
       
       #puts sub_channel_title
-      #byebug
       @sub_counter += 1
       new_videos = search_list_by_keyword(@service, 'snippet',
         max_results: 50,
         channel_id: sub_channel_id,
         published_after: last_check_date, 
-        type: '')
+        type: '') 
 
       # @new_videos.items[0].snippet.title 
       unless new_videos.nil?
@@ -114,11 +109,16 @@ class YoutubeQueue
   def authorize
     init_authorize
 
-    if @credentials.nil? || @credentials.expires_at < Time.now
+    if @credentials.nil? 
       url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
 
       return {:type => "url", :url => url }
-    else
+    else 
+      if @credentials.expires_at < Time.now
+        # Refresh the token
+        @credentials.refresh!
+      end
+      
       return {:type => "credentials", :credentials => @credentials }
     end
   end

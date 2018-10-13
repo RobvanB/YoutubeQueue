@@ -2,6 +2,7 @@ class VideosController < ApplicationController
   before_action :set_video, only: [:show, :edit, :update, :destroy]
 
   def pull
+
     # First check authentication
     response  = YoutubeQueue.new.authorize
     type      = response[:type]
@@ -14,12 +15,14 @@ class VideosController < ApplicationController
 
     if url.nil? || url.empty?
       # get new videos from Youtube
+      flash.discard
       counters = YoutubeQueue.new.get_videos(credentials)
 
       flash[:notice] = "Updated " + counters['vid_count'].to_s + " videos from " + 
                                   counters['sub_count'].to_s + " subscriptions."
      
       @videos = Video.all
+      redirect_to videos_path
     else
       # (re-)authenticate
       redirect_to url
