@@ -15,5 +15,7 @@ Rails.application.routes.draw do
     get 'pull', to: 'videos#pull', as: :pull
 
     get 'set_watched/:id', to: 'videos#set_watched'
+
+    get 'oauth2callback', to: 'videos#set_token'
   end
 end

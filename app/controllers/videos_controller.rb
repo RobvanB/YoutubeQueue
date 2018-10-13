@@ -2,15 +2,35 @@ class VideosController < ApplicationController
   before_action :set_video, only: [:show, :edit, :update, :destroy]
 
   def pull
-    # get new videos from Youtube
-    counters = YoutubeQueue.new.get_videos
+    # First check authentication
+    response  = YoutubeQueue.new.authorize
+    type      = response[:type]
 
-    flash[:notice] = "Updated " + counters['vid_count'].to_s + " videos from " + 
-                                counters['sub_count'].to_s + " subscriptions."
-   
-    @videos = Video.all
+    if type == 'url'
+      url = response[:url]
+    else
+      credentials = response[:credentials]
+    end
+
+    if url.nil? || url.empty?
+      # get new videos from Youtube
+      counters = YoutubeQueue.new.get_videos(credentials)
+
+      flash[:notice] = "Updated " + counters['vid_count'].to_s + " videos from " + 
+                                  counters['sub_count'].to_s + " subscriptions."
+     
+      @videos = Video.all
+    else
+      # (re-)authenticate
+      redirect_to url
+    end
   end
 
+  def set_token
+    YoutubeQueue.new.do_set_token(params[:code])
+    redirect_to videos_path
+  end
+  
   def get_subscriptions
     @my_scubscriptions = YoutubeQueue.new.get_subscriptions
   end
@@ -102,7 +122,6 @@ class VideosController < ApplicationController
       format.json { head :no_content }
     end
   end
-
 
   private
     # Use callbacks to share common setup or constraints between actions.

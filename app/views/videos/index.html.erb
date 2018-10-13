@@ -1,10 +1,6 @@
 <% provide(:title, "Videos") %>
 
 <div id="grid_here" style="width: 1500px; height: 600px;"></div>
-<input type="button" value="Add" onclick="grid.addRow(grid.uid(),'new user')" />
-<input type="button" value="Delete"
-onclick="grid.deleteSelectedRows()" />
-
 <script type="text/javascript" charset="UTF-8">
   var grid = new dhtmlXGridObject("grid_here");
   grid.setImagePath("assets/imgs/");

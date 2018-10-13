@@ -1,19 +1,14 @@
 class YoutubeQueue
-  # Sample Ruby code for user authorization
 
   require 'rubygems'
-  #gem 'google-api-client', '>0.7'
   require 'google/apis'
   require 'google/apis/youtube_v3'
   require 'googleauth'
   require 'googleauth/stores/file_token_store'
-
   require 'fileutils'
-
-  #include Datagrid
-  
+ 
   # REPLACE WITH VALID REDIRECT_URI FOR YOUR CLIENT
-  REDIRECT_URI = 'http://localhost'
+  REDIRECT_URI = 'http://localhost:3000/set_token'
   APPLICATION_NAME = 'YouTube Data API Ruby Tests'
 
   # REPLACE WITH NAME/LOCATION OF YOUR client_secrets.json FILE
@@ -31,7 +26,7 @@ class YoutubeQueue
     # Initialize the API
     @service = Google::Apis::YoutubeV3::YouTubeService.new
     @service.client_options.application_name = APPLICATION_NAME
-    @service.authorization = authorize
+    #@service.authorization = authorize
     time = Time.now.utc 
     @new_lastcheck_date = time.year.to_s + "-" + time.month.to_s + "-" + time.day.to_s + "T" + time.hour.to_s + ":" +
       time.min.to_s + ":00Z" #Format: '2018-08-10T00:00:00Z'
@@ -39,8 +34,8 @@ class YoutubeQueue
     @sub_counter = 0
   end
 
-
-  def get_videos
+  def get_videos(credentials)
+    @service.authorization = credentials
     #Get the last time the videos were pulled
     ytq_param = YtqParam.first  # There will be/should be only 1 record
     if ytq_param.nil? || ytq_param.last_date.nil?
@@ -106,26 +101,32 @@ class YoutubeQueue
     @my_subscriptions = @service.list_subscriptions('snippet,contentDetails', mine: true, max_results: 50)
   end
 
-  def authorize
+  def init_authorize
     FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
 
-    client_id   = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
-    token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
-    authorizer  = Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
-    user_id     = 'default'
-    credentials = authorizer.get_credentials(user_id)
-    if credentials.nil? || credentials.expires_at < Time.now
-      #byebug
-      url = authorizer.get_authorization_url(base_url: REDIRECT_URI)
-      puts "Open the following URL in the browser and enter the " +
-           "resulting code after authorization"
-      puts url
-      code = gets
-      puts "CODE: " + code
-      credentials = authorizer.get_and_store_credentials_from_code(
-        user_id: user_id, code: code, base_url: REDIRECT_URI)
+    @client_id   = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
+    @token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
+    @authorizer  = Google::Auth::UserAuthorizer.new(@client_id, SCOPE, @token_store)
+    @user_id     = 'default'
+    @credentials = @authorizer.get_credentials(@user_id)
+  end
+
+  def authorize
+    init_authorize
+
+    if @credentials.nil? || @credentials.expires_at < Time.now
+      url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
+
+      return {:type => "url", :url => url }
+    else
+      return {:type => "credentials", :credentials => @credentials }
     end
-    credentials
+  end
+
+  def do_set_token token
+    init_authorize
+    @credentials = @authorizer.get_and_store_credentials_from_code(
+        user_id: @user_id, code: token, base_url: REDIRECT_URI)
   end
 
   def search_list_by_keyword(service, part, **params)
