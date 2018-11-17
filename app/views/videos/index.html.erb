@@ -3,17 +3,36 @@
 <div id="grid_here" style="width: 1500px; height: 600px;"></div>
 <script type="text/javascript" charset="UTF-8">
   var grid = new dhtmlXGridObject("grid_here");
+
   grid.setImagePath("assets/imgs/");
   grid.setHeader("Channel, Date Published, Title, WATCH, Watched, Set Watched, Edit");
-  grid.attachHeader("#text_filter,#text_filter,#text_filter, ,#select_filter,,,");
-  grid.setColSorting("str,date,str, str, boolean");
+  grid.attachHeader("#text_filter,#text_filter,#text_filter, ,#combo_filter,,,");
+  grid.setColSorting("str,str,str,,str,,,");
   grid.setInitWidths("200,100,500,100,100,100,100");
+
   grid.setSkin("dhx_skyblue");
   grid.setColTypes("ro,ro,ro,link,ro,link,link");
-  grid.init();
-  grid.sortRows(1, "date", "asc");
 
+  //var watched = grid.getFilterElement(4).value;
+  
+  grid.attachEvent("onDataReady", function(){ 
+    grid.sortRows(1, "str", "asc"); // Sort by published date
+    //grid.filterBy(4, "No", true);         // Only show unwatched videos
+    
+   });
+
+ grid.attachEvent("onGridReconstructed", function(grid){
+  });
+
+ grid.attachEvent("onFilterEnd", function(indexes, values){
+  grid.filterBy(4, "No", true);         // Only show unwatched videos
+  alert("Filter hardcoded to unwatched only");
+  return true;
+ });
+
+  grid.init(); 
   grid.load("<%= data_path %>", "json");
+  grid.filterByAll();
 </script>
 
 <% # if - statement below only to comment out code %>

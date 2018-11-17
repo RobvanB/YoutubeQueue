@@ -1,14 +1,13 @@
 class VideosController < ApplicationController
   before_action :set_video, only: [:show, :edit, :update, :destroy]
 
-  def pull
-
+  def pull # Load the newest videos from your subscriptions
     # First check authentication
     response  = YoutubeQueue.new.authorize
     type      = response[:type]
 
     if type == 'url'
-      url = response[:url]
+      url = response[:url] # (re-)authenticate
     else
       credentials = response[:credentials]
     end
@@ -32,6 +31,34 @@ class VideosController < ApplicationController
   def set_token
     YoutubeQueue.new.do_set_token(params[:code])
     redirect_to videos_path
+  end
+
+   #Method for sending data for the dhtmlXgrid control
+  def data
+  videos = Video.all
+  render :json => { :total_count => videos.length,
+                    :pos => 0,
+                    :rows => videos.map do |video|
+                    {
+                      :id => video.id,
+                      :data => [video.channel, video.published, video.title, "Watch^" + video.url, 
+                                video.watched ? "Yes" : "No",
+                                "Set watched^" +  "set_watched/"+ video.id.to_s + "^_self" ,
+                                "Edit^" + edit_video_path(video) ]
+                    }
+                    end
+                  }
+  end
+
+  # Method for setting a video as watched
+  def set_watched
+    video = Video.find(params[:id])
+    video.watched = true
+    video.save
+    respond_to do |format|
+      format.html { redirect_to videos_url, notice: 'Video set to "watched".' }
+      format.json { head :no_content }
+    end
   end
   
   def get_subscriptions
@@ -94,34 +121,6 @@ class VideosController < ApplicationController
     @video.destroy
     respond_to do |format|
       format.html { redirect_to videos_url, notice: 'Video was successfully destroyed.' }
-      format.json { head :no_content }
-    end
-  end
-
- #Method for sending data for the dhtmlXgrid control
- def data
-  videos = Video.all
-  render :json => { :total_count => videos.length,
-                    :pos => 0,
-                    :rows => videos.map do |video|
-                    {
-                      :id => video.id,
-                      :data => [video.channel, video.published, video.title, "Watch^" + video.url, 
-                                video.watched ? "Yes" : "No",
-                                "Set watched^" +  "set_watched/"+ video.id.to_s + "^_self" ,
-                                "Edit^" + edit_video_path(video) ]
-                    }
-                    end
-                  }
-  end
-
-  # Method for setting a video as watched
-  def set_watched
-    video = Video.find(params[:id])
-    video.watched = true
-    video.save
-    respond_to do |format|
-      format.html { redirect_to videos_url, notice: 'Video set to "watched".' }
       format.json { head :no_content }
     end
   end
