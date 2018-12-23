@@ -2,6 +2,7 @@
 <html>
   <head>
     <title><%= yield(:title) %> |YoutubeQueue</title>
+    <%= include_gon %>
     <%= csp_meta_tag %>
     <%= csrf_meta_tags %>
     <%= stylesheet_link_tag    'application', media: 'all',

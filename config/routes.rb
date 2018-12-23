@@ -17,5 +17,7 @@ Rails.application.routes.draw do
     get 'set_watched/:id', to: 'videos#set_watched'
 
     get 'oauth2callback', to: 'videos#set_token'
+
+    get 'set_filter/:filter', to: 'videos#set_filter'
   end
 end

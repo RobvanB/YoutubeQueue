@@ -1,6 +1,8 @@
 class VideosController < ApplicationController
   before_action :set_video, only: [:show, :edit, :update, :destroy]
 
+  @@filter = ""
+
   def pull # Load the newest videos from your subscriptions
     # First check authentication
     response  = YoutubeQueue.new.authorize
@@ -33,7 +35,7 @@ class VideosController < ApplicationController
     redirect_to videos_path
   end
 
-   #Method for sending data for the dhtmlXgrid control
+  #Method for sending data for the dhtmlXgrid control
   def data
   videos = Video.all
   render :json => { :total_count => videos.length,
@@ -60,6 +62,12 @@ class VideosController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  # Store / pass in last filter value from grid
+  def set_filter
+    @@filter = params[:filter]
+    session[:filter] = @@filter
+  end
   
   def get_subscriptions
     @my_scubscriptions = YoutubeQueue.new.get_subscriptions
@@ -69,6 +77,9 @@ class VideosController < ApplicationController
   # GET /videos.json
   def index
     @videos = Video.all
+    @@filter = session[:filter]
+    gon.filter = @@filter
+    #byebug
   end
 
   # GET /videos/1
