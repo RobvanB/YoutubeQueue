@@ -6,8 +6,6 @@
   var grid = new dhtmlXGridObject("grid_here");
   if (gon) { inputfilter = gon.filter };
 
-  //alert("Filter: " + inputfilter)
-
   grid.setImagePath("assets/imgs/");
   grid.setHeader("Channel, Date Published, Title, WATCH, Watched, Set Watched, Edit");
   grid.attachHeader("#text_filter,#text_filter,#text_filter, ,#combo_filter,,,");
@@ -17,92 +15,37 @@
   grid.setSkin("dhx_skyblue");
   grid.setColTypes("ro,ro,ro,link,ro,link,link");
 
+  //Events
   grid.attachEvent("onDataReady", function(){ 
     grid.sortRows(1, "str", "asc");     // Sort by published date
-    grid.filterBy(4, "No", true);       // Only show unwatched videos
-    var displayValue = grid.getFilterElement(0);
-    displayValue.value = inputfilter;
-    grid.filterBy(0,inputfilter,true);
+    grid.filterByAll();
+    return true;
    });
 
   grid.attachEvent("onFilterEnd", function(indexes, values){
       inputfilter = grid.getFilterElement(0).value;
-      if (inputfilter != "")
+      if (inputfilter != "" && inputfilter != "EMPTY")
       {
         dhx.ajax.get("/set_filter/" + inputfilter );
       }
+      else
+      {
+        dhx.ajax.get("/set_filter/EMPTY"); 
+      }  
       return true;
      });
 
+
+  //Main
   grid.init(); 
   grid.load("<%= data_path %>", "json");
-  //grid.filterByAll();
 
- 
-  <% # if - statement below only to comment out code %>
-  <% if false %> 
+  // Set current filter value at startup
+  var displayValue = grid.getFilterElement(0);
+  if (inputfilter != "EMPTY")
+  {
+    displayValue.value = inputfilter;
+  }
 
-    grid.attachEvent("onGridReconstructed", function(grid){
-    });
-
-
-   var states=[];
-      grid.attachEvent("onFilterStart",function(c,v){
-      states=v; //array of filter values
-      return true;
-      });
-
-
-     grid.attachEvent("onFilterEnd", function(indexes, values){
-      grid.filterBy(4, "No", true);         // Only show unwatched videos
-      alert("Filter hardcoded to unwatched only"); 
-      return true;
-     });
-
-    grid.attachEvent("onFilterStart",function(c,v){     
-      return true;
-      });
-    
-
-  <% end %>
-
-
-  
+  grid.filterByAll();
 </script>
-
-<% # if - statement below only to comment out code %>
-<% if false %>
-
-<table>
-  <thead>
-    <tr>
-      <th>Channel</th>
-      <th>Date Published</th>
-      <th>Title</th>
-      <th>Url</th>
-      <th>Watched</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-  
-  <tbody>
-    <% @videos.each do |video| %>
-      <tr>
-        <td><%= video.channel %></td>
-        <td><%= video.published %></td>
-        <td><%= video.title %></td>
-        <td><%= link_to("WATCH", video.url, target: :_blank) %>
-        <td><%= video.watched %></td>
-        <td><%= link_to 'Show', video %></td>
-        <td><%= link_to 'Edit', edit_video_path(video) %></td>
-        <td><%= link_to 'Destroy', video, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-        <td><%= link_to 'watched', video, method: :set_watched %></td>
-
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<% end %>
-<br>
-
