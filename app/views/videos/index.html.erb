@@ -2,9 +2,17 @@
 
 <div id="grid_here" style="width: 1500px; height: 600px;"></div>
 <script type="text/javascript" charset="UTF-8">
-  var inputfilter = "";
+  var channel = "";
+  var watched = "";
+
   var grid = new dhtmlXGridObject("grid_here");
-  if (gon) { inputfilter = gon.filter };
+  if (gon) 
+  { 
+    channel = gon.channel;
+    watched = gon.watched;
+  };
+
+  //alert(channel + " / " + watched);
 
   grid.setImagePath("assets/imgs/");
   grid.setHeader("Channel, Date Published, Title, WATCH, Watched, Set Watched, Edit");
@@ -22,16 +30,49 @@
     return true;
    });
 
-  grid.attachEvent("onFilterEnd", function(indexes, values){
-      inputfilter = grid.getFilterElement(0).value;
-      if (inputfilter != "" && inputfilter != "EMPTY")
+  grid.attachEvent("onFilterEnd", function(elements){
+      channel = elements[0][0].value;
+      watched = elements[3][0].value;
+      
+      if (channel == "")
       {
-        dhx.ajax.get("/set_filter/" + inputfilter );
+        channel = "EMPTY";
       }
-      else
+      
+      if (watched == "" || watched == null)
       {
-        dhx.ajax.get("/set_filter/EMPTY"); 
+        watched = "EMPTY";
       }  
+
+      var jsHash = new Object();
+      jsHash['channel'] = channel ;
+      jsHash['watched'] = watched ;
+
+      dhx.ajax.get("/set_filter/" + JSON.stringify(jsHash) ); 
+
+      //elements[3][0].value = "No"; // Watched Y/N    
+      //for (i in elements)
+      //{   
+      //  var filter_value=elements[i][0].value; 
+      //  alert( i + " " + filter_value);
+      //} 
+
+      return true;
+     });
+
+  grid.attachEvent("onFilterStart", function(indexes, values){
+      
+      /*
+      if (values[3] == "" && watched != "EMPTY")
+      {
+        values[3] = watched;
+      }
+      */
+      if (values[3] != "Yes")
+      {
+        values[3] = "No";
+      }
+
       return true;
      });
 
@@ -41,11 +82,10 @@
   grid.load("<%= data_path %>", "json");
 
   // Set current filter value at startup
-  var displayValue = grid.getFilterElement(0);
-  if (inputfilter != "EMPTY")
+  var displayValue1 = grid.getFilterElement(0);
+  if (channel != "EMPTY")
   {
-    displayValue.value = inputfilter;
+    displayValue1.value = channel;
   }
 
-  grid.filterByAll();
 </script>

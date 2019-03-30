@@ -1,8 +1,6 @@
 class VideosController < ApplicationController
   before_action :set_video, only: [:show, :edit, :update, :destroy]
 
-  @@filter = ""
-
   def pull # Load the newest videos from your subscriptions
     # First check authentication
     response  = YoutubeQueue.new.authorize
@@ -63,10 +61,15 @@ class VideosController < ApplicationController
     end
   end
 
-  # Store / pass in last filter value from grid
+  # Store / pass in last filter values from grid
   def set_filter
-    @@filter = params[:filter]
-    session[:filter] = @@filter
+    #byebug
+    filterJSON = params[:filter]
+    filterHash = JSON.parse(filterJSON)
+    channel = filterHash["channel"]
+    watched = filterHash["watched"]
+    session[:channel] = channel
+    session[:watched] = watched
   end
   
   def get_subscriptions
@@ -77,8 +80,10 @@ class VideosController < ApplicationController
   # GET /videos.json
   def index
     @videos = Video.all
-    @@filter = session[:filter]
-    gon.filter = @@filter
+    channel = session[:channel]
+    watched = session[:watched]
+    gon.channel = channel
+    gon.watched = watched
     #byebug
   end
 

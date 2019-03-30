@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_23_134623) do
+ActiveRecord::Schema.define(version: 2019_03_23_225627) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 2018_09_23_134623) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "published"
+    t.index ["channel", "title"], name: "index_videos_on_channel_and_title", unique: true
   end
 
   create_table "ytq_params", force: :cascade do |t|

@@ -33,6 +33,7 @@ class YoutubeQueue
   def get_videos(credentials)
     @service.authorization = credentials
     # Get the last time the videos were pulled
+    #byebug
     ytq_param = YtqParam.first  # There will be/should be only 1 record
     if ytq_param.nil? || ytq_param.last_date.nil?
       last_check_date = '2018-08-10T00:00:00Z'  #'2018-08-10T00:00:00Z' Initial start date
@@ -72,8 +73,13 @@ class YoutubeQueue
               @video.title      = @title
               @video.url        = "https://www.youtube.com/watch?v="+ @video_id
               @video.published  = @published_at
-              @video.save
-              @vid_counter += 1
+              begin
+                @video.save
+                @vid_counter += 1
+              rescue ActiveRecord::StatementInvalid => e
+                # Handle duplicates (i.e. ignore)
+                raise e unless e = ActiveRecord::RecordNotUnique
+              end
             end
         end
       end
@@ -89,6 +95,8 @@ class YoutubeQueue
       ytq_param.save
     end
     counts = Hash["vid_count" => @vid_counter, "sub_count" => @sub_counter]
+
+   
   end
 
   def get_subscriptions

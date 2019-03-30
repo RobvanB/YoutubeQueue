@@ -1,0 +1,17 @@
+DO $$
+Declare lastDate TEXT;
+Declare countVid int;
+BEGIN
+select last_date from ytq_params into lastDate;
+--raise notice 'Date: %', lastDate;
+
+select count(*) from videos into countVid;
+raise notice 'Count before: %', countVid;
+
+--update videos set watched = true where published < '2018-10-12' ;
+--delete from videos where watched = true;
+
+select count(*) from videos into countVid;
+raise notice 'Count after: %', countVid;
+END $$
+

@@ -1,0 +1,15 @@
+--select * from videos where title like 'Big Airs%';
+--
+DO $$
+DECLARE rec RECORD;
+DECLARE delRec RECORD;
+BEGIN
+FOR rec IN
+  select * from videos ORDER BY title 
+  LOOP
+  raise notice 'Title : % %', rec.title, rec.id ;
+  SELECT * from videos where title = rec.title AND videos.id != rec.id INTO delRec;
+  raise notice 'Delete: % %', delRec.title, delRec.id;
+  --delete from videos where title = rec.title AND videos.id != rec.id;
+  END LOOP;
+END $$
