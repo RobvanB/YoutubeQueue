@@ -69,11 +69,3 @@ gem 'launchy'
 gem 'thin'
 gem 'sinatra'
 
-# Below if to prevent SassC error when compiling on Heroku
-group :assets do
-  gem 'therubyracer'
-  gem 'sass-rails'
-  gem 'coffee-rails'
-  gem 'uglifier'
-end
-
