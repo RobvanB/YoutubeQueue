@@ -48,6 +48,14 @@ div {
 
 #notice {
   color: green;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+#alert {
+  color: red;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .field_with_errors {

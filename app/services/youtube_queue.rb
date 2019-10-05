@@ -6,6 +6,7 @@ class YoutubeQueue
   require 'googleauth'
   require 'googleauth/stores/file_token_store'
   require 'fileutils'
+  require 'json'
  
   # VALID REDIRECT_URI FOR YOUR CLIENT
   REDIRECT_URI        = 'http://localhost:3000/set_token'
@@ -95,8 +96,6 @@ class YoutubeQueue
       ytq_param.save
     end
     counts = Hash["vid_count" => @vid_counter, "sub_count" => @sub_counter]
-
-   
   end
 
   def get_subscriptions
@@ -105,13 +104,41 @@ class YoutubeQueue
   end
 
   def init_authorize
-    FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
+    #byebug
+    # Check if we have all required env vars
+    @env_proj_id = ENV['GOOGLE_PROJECT_ID']
+    @env_client_id = ENV['GOOGLE_CLIENT_ID']
+    @env_client_secret = ENV['GOOGLE_CLIENT_SECRET']
 
-    @client_id   = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
+    if @env_proj_id.nil? || @env_client_secret.nil? || @env_client_id.nil?
+        raise ArgumentError.new('Environment variables not set')
+    end
+
+    # Build the secrets file based on environment variables
+    tempHash = {
+    "client_id" => ENV['GOOGLE_CLIENT_ID'],
+    "project_id" => ENV['GOOGLE_PROJECT_ID'],
+    "auth_uri" => "https://accounts.google.com/o/oauth2/auth",
+    "token_uri" => "https://www.googleapis.com/oauth2/v3/token",
+    "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret" => ENV['GOOGLE_CLIENT_SECRET'],
+    "redirect_uris" => ["urn:ietf:wg:oauth:2.0:oob","http://localhost"]
+    }
+
+    tempHash2 = { "installed" => tempHash}
+
+    File.open(CLIENT_SECRETS_PATH,"w") do |f|
+      f.write(tempHash2.to_json)
+    end
+
+    FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
     @token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
+    @client_id   = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
     @authorizer  = Google::Auth::UserAuthorizer.new(@client_id, SCOPE, @token_store)
     @user_id     = 'default'
     @credentials = @authorizer.get_credentials(@user_id)
+
+    File.delete(CLIENT_SECRETS_PATH)
   end
 
   def authorize
@@ -129,6 +156,13 @@ class YoutubeQueue
       
       return {:type => "credentials", :credentials => @credentials }
     end
+
+    rescue Exception => ex
+      #byebug
+      if File.exist?(CLIENT_SECRETS_PATH)
+        File.delete(CLIENT_SECRETS_PATH)
+      end
+      return {:type => "error", :msg => "Something went wrong while authenticating: #{ex.message}"}
   end
 
   def do_set_token token

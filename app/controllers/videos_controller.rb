@@ -2,12 +2,17 @@ class VideosController < ApplicationController
   before_action :set_video, only: [:show, :edit, :update, :destroy]
 
   def pull # Load the newest videos from your subscriptions
+    flash.discard
     # First check authentication
     response  = YoutubeQueue.new.authorize
     type      = response[:type]
-
+   
     if type == 'url'
       url = response[:url] # (re-)authenticate
+    elsif type == "error"
+      flash[:alert] = response[:msg]
+      redirect_to videos_path
+      return
     else
       credentials = response[:credentials]
     end
