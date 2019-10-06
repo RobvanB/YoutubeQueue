@@ -22,6 +22,12 @@ class VideosController < ApplicationController
       flash.discard
       counters = YoutubeQueue.new.get_videos(credentials)
 
+      if !counters[:type].nil? &&  counters[:type] == "error"
+        flash[:alert] = counters[:msg]
+        redirect_to videos_path
+        return
+      end
+
       flash[:notice] = "Updated " + counters['vid_count'].to_s + " videos from " + 
                                   counters['sub_count'].to_s + " subscriptions."
      

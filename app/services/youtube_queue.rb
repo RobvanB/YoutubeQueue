@@ -38,7 +38,6 @@ class YoutubeQueue
   def get_videos(credentials)
     @service.authorization = credentials
     # Get the last time the videos were pulled
-    #byebug
     ytq_param = YtqParam.first  # There will be/should be only 1 record
     if ytq_param.nil? || ytq_param.last_date.nil?
       last_check_date = '2018-08-10T00:00:00Z'  #'2018-08-10T00:00:00Z' Initial start date
@@ -47,7 +46,11 @@ class YoutubeQueue
     end
 
     #Do the seach for each channel I'm subscribed to
-    get_subscriptions
+    resp = get_subscriptions
+
+    if (resp)
+      raise  resp
+    end
 
     @my_subscriptions.items.each do | sub |
       sub_channel_id    = sub.snippet.resource_id.channel_id
@@ -100,15 +103,21 @@ class YoutubeQueue
       ytq_param.save
     end
     counts = Hash["vid_count" => @vid_counter, "sub_count" => @sub_counter]
+
+    rescue Exception => ex
+      #byebug
+      return resp
   end
 
   def get_subscriptions
     #@my_channel_id = 'UCvQQkj0g7xL21tf5Fo6Ogvg'
     @my_subscriptions = @service.list_subscriptions('snippet,contentDetails', mine: true, max_results: 50)
+    
+    rescue Exception => ex
+      return {:type => "error", :msg => "Error with Google API: #{ex.message}"}
   end
 
   def init_authorize
-    #byebug
     # Check if we have all required env vars
     @env_proj_id = ENV['GOOGLE_PROJECT_ID']
     @env_client_id = ENV['GOOGLE_CLIENT_ID']
@@ -164,7 +173,6 @@ class YoutubeQueue
     end
 
     rescue Exception => ex
-      #byebug
       if File.exist?(CLIENT_SECRETS_PATH)
         File.delete(CLIENT_SECRETS_PATH)
       end
@@ -180,5 +188,10 @@ class YoutubeQueue
 
   def search_list_by_keyword(service, part, **params)
     service.list_searches(part, params)
-  end
+  
+  rescue Exception => ex
+    return {:type => "error", :msg => "Error with Google API: #{ex.message}"}
+
+  end   
+
 end
