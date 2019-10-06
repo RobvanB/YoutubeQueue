@@ -9,7 +9,8 @@ class YoutubeQueue
   require 'json'
 
   # VALID REDIRECT_URI FOR YOUR CLIENT
-  REDIRECT_URI        = 'http://localhost:3000/set_token'
+  #REDIRECT_URI        = 'http://localhost:3000/set_token'
+
   APPLICATION_NAME    = 'YoutubeQueue'
   # NAME/LOCATION OF YOUR client_secrets.json FILE
   CLIENT_SECRETS_PATH = 'client_secret_Oauth2_Ruby.json'
@@ -111,20 +112,21 @@ class YoutubeQueue
     @env_proj_id = ENV['GOOGLE_PROJECT_ID']
     @env_client_id = ENV['GOOGLE_CLIENT_ID']
     @env_client_secret = ENV['GOOGLE_CLIENT_SECRET']
+    @env_redirect_uri = ENV['GOOGLE_REDIRECT_URI']
 
-    if @env_proj_id.nil? || @env_client_secret.nil? || @env_client_id.nil?
+    if @env_proj_id.nil? || @env_client_secret.nil? || @env_client_id.nil? || @env_redirect_uri.nil?
         raise ArgumentError.new('Environment variables not set')
     end
 
     # Build the secrets file based on environment variables
     tempHash = {
-    "client_id" => ENV['GOOGLE_CLIENT_ID'],
-    "project_id" => ENV['GOOGLE_PROJECT_ID'],
+    "client_id" => @env_client_id,
+    "project_id" => @env_proj_id,
     "auth_uri" => "https://accounts.google.com/o/oauth2/auth",
     "token_uri" => "https://www.googleapis.com/oauth2/v3/token",
     "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
-    "client_secret" => ENV['GOOGLE_CLIENT_SECRET'],
-    "redirect_uris" => ["urn:ietf:wg:oauth:2.0:oob","http://localhost"]
+    "client_secret" => @env_client_secret,
+    "redirect_uris" => ["urn:ietf:wg:oauth:2.0:oob", @env_redirect_uri]
     }
 
     tempHash2 = { "installed" => tempHash}
@@ -147,7 +149,8 @@ class YoutubeQueue
     init_authorize
 
     if @credentials.nil? 
-      url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
+      #url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
+      url = @authorizer.get_authorization_url(base_url: @env_redirect_uri)
 
       return {:type => "url", :url => url }
     else 
@@ -170,7 +173,8 @@ class YoutubeQueue
   def do_set_token token
     init_authorize
     @credentials = @authorizer.get_and_store_credentials_from_code(
-        user_id: @user_id, code: token, base_url: REDIRECT_URI)
+        #user_id: @user_id, code: token, base_url: REDIRECT_URI)
+        user_id: @user_id, code: token, base_url: @env_redirect_uri)
   end
 
   def search_list_by_keyword(service, part, **params)
