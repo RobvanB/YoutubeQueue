@@ -15,7 +15,8 @@ class YoutubeQueue
   # NAME/LOCATION OF YOUR client_secrets.json FILE
   CLIENT_SECRETS_PATH = 'client_secret_Oauth2_Ruby.json'
   # WHERE CREDENTIALS WILL BE STORED
-  CREDENTIALS_PATH    = File.join(Dir.home, '.credentials',"YoutubeQueue.yaml")
+  #CREDENTIALS_PATH    = File.join(Dir.home, '.credentials',"YoutubeQueue.yaml")
+  CREDENTIALS_PATH    = File.join('.credentials',"YoutubeQueue.yaml")
 
   #CREDENTIALS_PATH    = File.join('.credentials',"YoutubeQueue.yaml")
 
