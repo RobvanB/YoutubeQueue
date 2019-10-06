@@ -6,15 +6,9 @@
   require 'fileutils'
   require 'json'
 
+byebug
+ @uri = "https://localhost:3000"
 
-  tmpHash = { :type => "error" }
-
-  type = tmpHash[:type]
-
-  if type == 'ff'
-    print "nope"
-  elsif type == 'error'
-    print "ok"
-  end
+ @uri2 = URI.join(@uri, "set_token").to_s
 
   print "END"

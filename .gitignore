@@ -32,4 +32,6 @@ OLD_client_secret_Oauth2_Ruby.json
 webApp.client_secrets.json
 setEnvYTQ.sh
 .credentials
-/credentials/*
+/.credentials/*
+rTEST.rb
+temp.json

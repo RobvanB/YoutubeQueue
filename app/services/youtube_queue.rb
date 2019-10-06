@@ -150,7 +150,7 @@ class YoutubeQueue
 
     if @credentials.nil? 
       #url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
-      url = @authorizer.get_authorization_url(base_url: @env_redirect_uri)
+      url = @authorizer.get_authorization_url(base_url: URI.join(@env_redirect_uri, "set_token").to_s)
 
       return {:type => "url", :url => url }
     else 
@@ -174,7 +174,7 @@ class YoutubeQueue
     init_authorize
     @credentials = @authorizer.get_and_store_credentials_from_code(
         #user_id: @user_id, code: token, base_url: REDIRECT_URI)
-        user_id: @user_id, code: token, base_url: @env_redirect_uri)
+        user_id: @user_id, code: token, base_url: URI.join(@env_redirect_uri, "set_token").to_s)
   end
 
   def search_list_by_keyword(service, part, **params)
