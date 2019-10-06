@@ -7,7 +7,7 @@ class YoutubeQueue
   require 'googleauth/stores/file_token_store'
   require 'fileutils'
   require 'json'
- 
+
   # VALID REDIRECT_URI FOR YOUR CLIENT
   REDIRECT_URI        = 'http://localhost:3000/set_token'
   APPLICATION_NAME    = 'YoutubeQueue'
@@ -15,6 +15,8 @@ class YoutubeQueue
   CLIENT_SECRETS_PATH = 'client_secret_Oauth2_Ruby.json'
   # WHERE CREDENTIALS WILL BE STORED
   CREDENTIALS_PATH    = File.join(Dir.home, '.credentials',"YoutubeQueue.yaml")
+
+  #CREDENTIALS_PATH    = File.join('.credentials',"YoutubeQueue.yaml")
 
   # SCOPE FOR WHICH THIS SCRIPT REQUESTS AUTHORIZATION
   SCOPE = Google::Apis::YoutubeV3::AUTH_YOUTUBE_FORCE_SSL
