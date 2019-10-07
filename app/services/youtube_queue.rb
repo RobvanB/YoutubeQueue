@@ -36,6 +36,7 @@ class YoutubeQueue
   end
 
   def get_videos(credentials)
+    
     @service.authorization = credentials
     # Get the last time the videos were pulled
     ytq_param = YtqParam.first  # There will be/should be only 1 record
@@ -48,7 +49,7 @@ class YoutubeQueue
     #Do the seach for each channel I'm subscribed to
     resp = get_subscriptions
 
-    if (resp)
+    if resp.is_a?(Hash) && !resp[:type].nil? && (resp[:type] == "error")
       raise  resp
     end
 
@@ -103,6 +104,7 @@ class YoutubeQueue
       ytq_param.save
     end
     counts = Hash["vid_count" => @vid_counter, "sub_count" => @sub_counter]
+    return counts
 
     rescue Exception => ex
       #byebug

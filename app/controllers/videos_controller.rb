@@ -22,7 +22,7 @@ class VideosController < ApplicationController
       flash.discard
       counters = YoutubeQueue.new.get_videos(credentials)
 
-      if !counters[:type].nil? &&  counters[:type] == "error"
+      if counters.is_a?(Hash) && !counters[:type].nil? &&  counters[:type] == "error"
         flash[:alert] = counters[:msg]
         redirect_to videos_path
         return
