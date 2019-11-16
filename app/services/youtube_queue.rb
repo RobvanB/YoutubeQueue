@@ -15,10 +15,7 @@ class YoutubeQueue
   # NAME/LOCATION OF YOUR client_secrets.json FILE
   CLIENT_SECRETS_PATH = 'client_secret_Oauth2_Ruby.json'
   # WHERE CREDENTIALS WILL BE STORED
-  #CREDENTIALS_PATH    = File.join(Dir.home, '.credentials',"YoutubeQueue.yaml")
-  CREDENTIALS_PATH    = File.join('.credentials',"YoutubeQueue.yaml")
-
-  #CREDENTIALS_PATH    = File.join('.credentials',"YoutubeQueue.yaml")
+  USER_TOKEN_FILE    = File.join('.credentials',"YoutubeQueue.yaml")
 
   # SCOPE FOR WHICH THIS SCRIPT REQUESTS AUTHORIZATION
   SCOPE = Google::Apis::YoutubeV3::AUTH_YOUTUBE_FORCE_SSL
@@ -131,6 +128,7 @@ class YoutubeQueue
     end
 
     # Build the secrets file based on environment variables
+    # We cannot save it as a file on Heroku as there is no persistent file storage
     tempHash = {
     "client_id" => @env_client_id,
     "project_id" => @env_proj_id,
@@ -142,19 +140,27 @@ class YoutubeQueue
     }
 
     tempHash2 = { "installed" => tempHash}
-
-    File.open(CLIENT_SECRETS_PATH,"w") do |f|
+byebug
+    if (!File.exists?(CLIENT_SECRETS_PATH))
+        File.open(CLIENT_SECRETS_PATH,"w") do |f|
       f.write(tempHash2.to_json)
+      end
     end
 
-    FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
-    @token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
+    # If the token store does not exist create it
+    if (!File.exists?(USER_TOKEN_FILE))
+      FileUtils.mkdir_p(File.dirname(USER_TOKEN_FILE))
+    end
+
+    #TODO: store YoutubeQueue.yaml (USER_TOKEN_FILE) in DB and recreate file on init
+
+    @token_store = Google::Auth::Stores::FileTokenStore.new(file: USER_TOKEN_FILE)
     @client_id   = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
     @authorizer  = Google::Auth::UserAuthorizer.new(@client_id, SCOPE, @token_store)
     @user_id     = 'default'
     @credentials = @authorizer.get_credentials(@user_id)
 
-    File.delete(CLIENT_SECRETS_PATH)
+    #File.delete(CLIENT_SECRETS_PATH)
   end
 
   def authorize
