@@ -6,16 +6,17 @@
   require 'fileutils'
   require 'json'
 
-#byebug
+byebug
 
-tmphash = {:type => "error", :msg => "kablooyie"}
+#tmphash = {:type => "error", :msg => "kablooyie"}
 
-if tmphash.is_a?(Hash)
-	print "Type"
-end
+#if tmphash.is_a?(Hash)
+#	print "Type"
+#end
 
 
  #@uri = "https://localhost:3000"
  #@uri2 = URI.join(@uri, "set_token").to_s
 
-  print "END"
+
+print "END"

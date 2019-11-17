@@ -104,7 +104,6 @@ class YoutubeQueue
     return counts
 
     rescue Exception => ex
-      #byebug
       return resp
   end
 
@@ -117,6 +116,7 @@ class YoutubeQueue
   end
 
   def init_authorize
+
     # Check if we have all required env vars
     @env_proj_id = ENV['GOOGLE_PROJECT_ID']
     @env_client_id = ENV['GOOGLE_CLIENT_ID']
@@ -140,27 +140,28 @@ class YoutubeQueue
     }
 
     tempHash2 = { "installed" => tempHash}
-byebug
+
     if (!File.exists?(CLIENT_SECRETS_PATH))
         File.open(CLIENT_SECRETS_PATH,"w") do |f|
       f.write(tempHash2.to_json)
       end
     end
 
-    # If the token store does not exist create it
+    # Get and create the USER_TOKEN_FILE (this one is stored in the DB)
     if (!File.exists?(USER_TOKEN_FILE))
       FileUtils.mkdir_p(File.dirname(USER_TOKEN_FILE))
+      ytq_param         = YtqParam.first
+      @newFileContents  = ytq_param.fileContents
+      File.open(USER_TOKEN_FILE, "w") do |f|
+        f.write(@newFileContents )
+      end
     end
-
-    #TODO: store YoutubeQueue.yaml (USER_TOKEN_FILE) in DB and recreate file on init
 
     @token_store = Google::Auth::Stores::FileTokenStore.new(file: USER_TOKEN_FILE)
     @client_id   = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
     @authorizer  = Google::Auth::UserAuthorizer.new(@client_id, SCOPE, @token_store)
     @user_id     = 'default'
     @credentials = @authorizer.get_credentials(@user_id)
-
-    #File.delete(CLIENT_SECRETS_PATH)
   end
 
   def authorize
@@ -177,6 +178,7 @@ byebug
         @credentials.refresh!
       end
       
+      store_token
       return {:type => "credentials", :credentials => @credentials }
     end
 
@@ -187,11 +189,29 @@ byebug
       return {:type => "error", :msg => "Something went wrong while authenticating: #{ex.message}"}
   end
 
+  def store_token
+    # Store the token file in the DB
+    File.open(USER_TOKEN_FILE, "r") do |f|
+      @fileContents =  f.read.force_encoding("BINARY")
+    end
+
+    ytq_param = YtqParam.first  # There will be/should be only 1 record
+    if ytq_param.nil?
+      ytq_param = YtqParam.new
+      ytq_param.fileContents = @fileContents
+      ytq_param.save
+    else
+      ytq_param.fileContents = @fileContents
+      ytq_param.save
+    end
+  end
+
   def do_set_token token
     init_authorize
     @credentials = @authorizer.get_and_store_credentials_from_code(
         #user_id: @user_id, code: token, base_url: REDIRECT_URI)
         user_id: @user_id, code: token, base_url: URI.join(@env_redirect_uri, "set_token").to_s)
+    store_token
   end
 
   def search_list_by_keyword(service, part, **params)
