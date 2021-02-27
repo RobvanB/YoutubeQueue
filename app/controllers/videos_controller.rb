@@ -27,7 +27,7 @@ class VideosController < ApplicationController
         redirect_to videos_path
         return
       end
-
+      
       flash[:notice] = "Updated " + counters['vid_count'].to_s + " videos from " + 
                                   counters['sub_count'].to_s + " subscriptions."
      
@@ -44,7 +44,7 @@ class VideosController < ApplicationController
     redirect_to videos_path
   end
 
-  #Method for sending data for the dhtmlXgrid control
+  # Method for sending data for the dhtmlXgrid control
   def data
   videos = Video.all
   render :json => { :total_count => videos.length,
@@ -74,9 +74,10 @@ class VideosController < ApplicationController
 
   # Store / pass in last filter values from grid
   def set_filter
-    #byebug
+  #  byebug
     filterJSON = params[:filter]
     filterHash = JSON.parse(filterJSON)
+    #byebug
     channel = filterHash["channel"]
     watched = filterHash["watched"]
     session[:channel] = channel

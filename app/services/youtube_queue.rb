@@ -33,7 +33,6 @@ class YoutubeQueue
   end
 
   def get_videos(credentials)
-    
     @service.authorization = credentials
     # Get the last time the videos were pulled
     ytq_param = YtqParam.first  # There will be/should be only 1 record
@@ -42,8 +41,9 @@ class YoutubeQueue
     else
       last_check_date = ytq_param.last_date
     end
-
+    #byebug
     #Do the seach for each channel I'm subscribed to
+    
     resp = get_subscriptions
 
     if resp.is_a?(Hash) && !resp[:type].nil? && (resp[:type] == "error")
@@ -55,13 +55,14 @@ class YoutubeQueue
       sub_channel_title = sub.snippet.title
       
       #puts sub_channel_title
+      #puts sub_channel_id
       @sub_counter += 1
-      new_videos = search_list_by_keyword(@service, 'snippet',
+      new_videos = search_list_by_keyword(@service, 
+        'snippet',
         max_results: 50,
         channel_id: sub_channel_id,
-        published_after: last_check_date, 
-        type: '') 
-
+        published_after: last_check_date)
+      
       # @new_videos.items[0].snippet.title 
       unless new_videos.nil?
         new_videos.items.each do | item |
@@ -73,6 +74,9 @@ class YoutubeQueue
             @video_id       = item.id.video_id
             @kind           = item.id.kind
 
+            #puts @channel_id
+            #puts @channel_title
+            
             if @kind.eql? 'youtube#video'
               @video            = Video.new
               @video.channel    = @channel_title
@@ -100,6 +104,7 @@ class YoutubeQueue
       ytq_param.last_date = @new_lastcheck_date
       ytq_param.save
     end
+
     counts = Hash["vid_count" => @vid_counter, "sub_count" => @sub_counter]
     return counts
 
@@ -214,9 +219,13 @@ class YoutubeQueue
     store_token
   end
 
-  def search_list_by_keyword(service, part, **params)
-    service.list_searches(part, params)
-  
+  #def search_list_by_keyword(service, part, **params)
+  def search_list_by_keyword(service, part, channel_id:, max_results:, published_after:)
+    #byebug
+    service.list_searches(part, channel_id: channel_id, max_results: max_results, 
+                        published_after: published_after)
+   
+
   rescue Exception => ex
     return {:type => "error", :msg => "Error with Google API: #{ex.message}"}
 
