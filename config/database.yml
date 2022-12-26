@@ -82,4 +82,5 @@ production:
   <<: *default
   database: youtubequeue_production
   username: youtubequeue
-  password: <%= ENV['YOUTUBEQUEUE_DATABASE_PASSWORD'] %>
+#  password: <%= ENV['YOUTUBEQUEUE_DATABASE_PASSWORD'] %>
+

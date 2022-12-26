@@ -121,7 +121,6 @@ class YoutubeQueue
   end
 
   def init_authorize
-
     # Check if we have all required env vars
     @env_proj_id = ENV['GOOGLE_PROJECT_ID']
     @env_client_id = ENV['GOOGLE_CLIENT_ID']
@@ -134,6 +133,7 @@ class YoutubeQueue
 
     # Build the secrets file based on environment variables
     # We cannot save it as a file on Heroku as there is no persistent file storage
+    # When executed locally (development), these are Linux env variables, Heroku has them in the Heroku setup (web)
     tempHash = {
     "client_id" => @env_client_id,
     "project_id" => @env_proj_id,
@@ -152,13 +152,20 @@ class YoutubeQueue
       end
     end
 
-    # Get and create the USER_TOKEN_FILE (this one is stored in the DB)
+    # If we don't have the local .credentials/YoutubeQueue.yaml file (USER_TOKEN_FILE),
+    # get the tokens and create the USER_TOKEN_FILE (this one is stored in the DB) 
+    # 
     if (!File.exists?(USER_TOKEN_FILE))
       FileUtils.mkdir_p(File.dirname(USER_TOKEN_FILE))
       ytq_param         = YtqParam.first
-      @newFileContents  = ytq_param.fileContents
-      File.open(USER_TOKEN_FILE, "w") do |f|
-        f.write(@newFileContents )
+      if (!ytq_param.nil?)
+        @newFileContents  = ytq_param.fileContents
+        File.open(USER_TOKEN_FILE, "w") do |f|
+          f.write(@newFileContents )
+        end
+      #else
+      #  #"Token not stored in DB yet (ytq_params)" 
+      #  raise "Token not stored in DB yet (ytq_params)"
       end
     end
 
