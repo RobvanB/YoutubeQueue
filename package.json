@@ -1,0 +1,13 @@
+{
+  "name": "youtubequeue",
+  "private": true,
+  "dependencies": {
+    "@rails/webpacker": "5.2.1"
+  },
+  "devDependencies": {
+    "webpack-dev-server": "^3.11.2"
+  },
+  "engines": {
+    "node": "10.x"
+  }
+}

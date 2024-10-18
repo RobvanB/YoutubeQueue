@@ -1,0 +1,53 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Videos</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Channel</th>
+      <th>Date Published</th>
+      <th>Title</th>
+      <th>Url</th>
+      <th>Watched</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @videos.each do |video| %>
+      <tr>
+      	<td><%= video.channel %></td>
+        <td><%= video.published %></td>
+        <td><%= video.title %></td>
+        <td><%= link_to("WATCH", video.url, target: :_blank) %>
+        <td><%= video.watched %></td>
+        <td><%= link_to 'Show', video %></td>
+        <td><%= link_to 'Edit', edit_video_path(video) %></td>
+        <td><%= link_to 'Destroy', video, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%-# The if-false is only to comment out the block -%>
+<% if false %>
+<%= link_to 'New Video', new_video_path %>
+<%= link_to 'TEST', pull_path %>
+<H1>Pull Videos from Notificatons</H1>
+<p>
+"New videos: "
+<br>
+ <%= @new_videos.items[0].snippet.title %> 
+
+<br>
+<br>
+<%= @new_videos.items[1] %> 
+<br>
+<br>
+<br>
+<%= @new_videos.inspect %> 
+</p>
+<% end %>

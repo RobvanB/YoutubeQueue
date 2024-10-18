@@ -1,0 +1,97 @@
+<% provide(:title, "Videos") %>
+
+<div id="grid_here" style="width: 1500px; height: 600px;"></div>
+<script type="text/javascript" charset="UTF-8">
+  var channel = "";
+  var watched = "";
+
+  var grid = new dhtmlXGridObject("grid_here");
+  if (gon) 
+  { 
+    channel = gon.channel;
+    watched = gon.watched;
+  };
+
+  //alert(channel + " / " + watched);
+
+  grid.setImagePath("assets/imgs/");
+  grid.setHeader("Channel, Date Published, Title, WATCH, Watched, Set Watched, Edit");
+  grid.attachHeader("#text_filter,#text_filter,#text_filter, ,#combo_filter,,,");
+  grid.setColSorting("str,str,str,,str,,,");
+  grid.setInitWidths("200,100,500,100,100,100,100");
+
+  grid.setSkin("dhx_skyblue");
+  grid.setColTypes("ro,ro,ro,link,ro,link,link");
+
+  //Events
+  grid.attachEvent("onDataReady", function(){ 
+    grid.sortRows(1, "str", "asc");     // Sort by published date
+    grid.filterByAll();
+    return true;
+   });
+
+  grid.attachEvent("onFilterEnd", function(elements){
+      channel = elements[0][0].value;
+      watched = elements[3][0].value;
+      
+      if (channel == "")
+      {
+        channel = "EMPTY";
+      }
+      
+      if (watched == "" || watched == null)
+      {
+        watched = "EMPTY";
+      }  
+
+      var jsHash = new Object();
+      jsHash['channel'] = channel ;
+      jsHash['watched'] = watched ;
+
+      dhx.ajax.get("/set_filter/" + JSON.stringify(jsHash) ); 
+
+      //elements[3][0].value = "No"; // Watched Y/N    
+      //for (i in elements)
+      //{   
+      //  var filter_value=elements[i][0].value; 
+      //  alert( i + " " + filter_value);
+      //} 
+
+      return true;
+     });
+
+  grid.attachEvent("onFilterStart", function(indexes, values){
+      
+      /*
+      if (values[3] == "" && watched != "EMPTY")
+      {
+        values[3] = watched;
+      }
+      */
+      if (values[3] != "Yes")
+      {
+        values[3] = "No";
+      }
+
+      return true;
+     });
+
+
+  //Main
+  grid.init(); 
+  grid.load("<%= data_path %>", "json");
+
+  // Set current filter value at startup
+  var displayValue1 = grid.getFilterElement(0);
+  if (channel != "EMPTY")
+  {
+    displayValue1.value = channel;
+  }
+
+</script>
+<div>
+</br>
+  <p>
+    Click <a href="http://www.youtube.com/terms">here</a> for YouTube TOS that apparently is mandatory even on a site that is for personal use only.
+  </p>
+</div>
