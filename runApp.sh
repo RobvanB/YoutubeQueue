@@ -4,4 +4,4 @@ export GOOGLE_CLIENT_SECRET="MX8sp5v6lTTdCyAC3Uk4NAb8"
 #export GOOGLE_CLIENT_SECRET="vjxeRxtdLrjjT664fzTbdwkr"
 export GOOGLE_PROJECT_ID="younot-213022"
 export GOOGLE_REDIRECT_URI="http://localhost:3000"
-rails s
+rails s -b 0.0.0.0

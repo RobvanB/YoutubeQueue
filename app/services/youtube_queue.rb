@@ -50,47 +50,63 @@ class YoutubeQueue
       raise  resp
     end
 
-    @my_subscriptions.items.each do | sub |
-      sub_channel_id    = sub.snippet.resource_id.channel_id
-      sub_channel_title = sub.snippet.title
+    len_array = %w[medium long]
+    len_array.each do |len|
+      @my_subscriptions.items.each do | sub |
+        sub_channel_id    = sub.snippet.resource_id.channel_id
+        sub_channel_title = sub.snippet.title
       
-      #puts sub_channel_title
-      #puts sub_channel_id
-      @sub_counter += 1
-      new_videos = search_list_by_keyword(@service, 
-        'snippet',
-        max_results: 50,
-        channel_id: sub_channel_id,
-        published_after: last_check_date)
-      
-      # @new_videos.items[0].snippet.title 
-      unless new_videos.nil?
-        new_videos.items.each do | item |
-            @channel_id     = item.snippet.channel_id
-            @channel_title  = item.snippet.channel_title
-            @video_desc     = item.snippet.description
-            @published_at   = item.snippet.published_at
-            @title          = item.snippet.title
-            @video_id       = item.id.video_id
-            @kind           = item.id.kind
+        #puts sub_channel_title
+        #puts sub_channel_id
+        @sub_counter += 1
+        #byebug
+        # Ignore stupid ass shorts. videoType 'episode' does not work.
+        # So we will just pull the 'medium' and 'long' videos
+      	#new_videos = search_list_by_keyword(@service,
+	#				'snippet',
+	#				max_results:50,
+	#				channel_id:sub_channel_id,
+	#				published_after:last_check_date,
+	#				type:'video',
+	#				videoType:'episode')
+      	new_videos = search_list_by_keyword(@service,
+					'snippet',
+					max_results:50,
+					channel_id:sub_channel_id,
+					published_after:last_check_date,
+					type:'video',
+					videoDuration:len)
 
-            #puts @channel_id
-            #puts @channel_title
-            
-            if @kind.eql? 'youtube#video'
-              @video            = Video.new
-              @video.channel    = @channel_title
-              @video.title      = @title
-              @video.url        = "https://www.youtube.com/watch?v="+ @video_id
-              @video.published  = @published_at
-              begin
-                @video.save
-                @vid_counter += 1
-              rescue ActiveRecord::StatementInvalid => e
-                # Handle duplicates (i.e. ignore)
-                raise e unless e = ActiveRecord::RecordNotUnique
+    	#byebug
+      	# @new_videos.items[0].snippet.title 
+        unless new_videos.nil?
+          new_videos.items.each do | item |
+              @channel_id     = item.snippet.channel_id
+              @channel_title  = item.snippet.channel_title
+              @video_desc     = item.snippet.description
+              @published_at   = item.snippet.published_at
+              @title          = item.snippet.title
+              @video_id       = item.id.video_id
+              @kind           = item.id.kind
+
+              #puts @channel_id
+              #puts @channel_title
+              
+              if @kind.eql? 'youtube#video'
+                @video            = Video.new
+                @video.channel    = @channel_title
+                @video.title      = @title
+                @video.url        = "https://www.youtube.com/watch?v="+ @video_id
+                @video.published  = @published_at
+                begin
+                  @video.save
+                  @vid_counter += 1
+                rescue ActiveRecord::StatementInvalid => e
+                  # Handle duplicates (i.e. ignore)
+                  raise e unless e = ActiveRecord::RecordNotUnique
               end
             end
+          end
         end
       end
     end
@@ -114,6 +130,7 @@ class YoutubeQueue
 
   def get_subscriptions
     #@my_channel_id = 'UCvQQkj0g7xL21tf5Fo6Ogvg'
+#byebug
     @my_subscriptions = @service.list_subscriptions('snippet,contentDetails', mine: true, max_results: 50)
     
     rescue Exception => ex
@@ -227,12 +244,14 @@ class YoutubeQueue
   end
 
   #def search_list_by_keyword(service, part, **params)
-  def search_list_by_keyword(service, part, channel_id:, max_results:, published_after:)
+  #def search_list_by_keyword(service, part, channel_id:, max_results:, published_after:)
+  #def search_list_by_keyword(service, part, channel_id:, max_results:, published_after:, type:, videoType:)
+  def search_list_by_keyword(service, part, channel_id:, max_results:, published_after:, type:, videoDuration:)
     #byebug
+    #service.list_searches(part, channel_id: channel_id, max_results: max_results, 
+    #                    published_after: published_after)
     service.list_searches(part, channel_id: channel_id, max_results: max_results, 
-                        published_after: published_after)
-   
-
+                        published_after: published_after, type: type, video_duration: videoDuration)
   rescue Exception => ex
     return {:type => "error", :msg => "Error with Google API: #{ex.message}"}
 
