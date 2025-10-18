@@ -138,6 +138,7 @@ class YoutubeQueue
   end
 
   def init_authorize
+#byebug
     # Check if we have all required env vars
     @env_proj_id = ENV['GOOGLE_PROJECT_ID']
     @env_client_id = ENV['GOOGLE_CLIENT_ID']
@@ -162,8 +163,8 @@ class YoutubeQueue
     }
 
     tempHash2 = { "installed" => tempHash}
-
-    if (!File.exists?(CLIENT_SECRETS_PATH))
+#byebug
+    if (!File.exist?(CLIENT_SECRETS_PATH))
         File.open(CLIENT_SECRETS_PATH,"w") do |f|
       f.write(tempHash2.to_json)
       end
@@ -172,7 +173,7 @@ class YoutubeQueue
     # If we don't have the local .credentials/YoutubeQueue.yaml file (USER_TOKEN_FILE),
     # get the tokens and create the USER_TOKEN_FILE (this one is stored in the DB) 
     # 
-    if (!File.exists?(USER_TOKEN_FILE))
+    if (!File.exist?(USER_TOKEN_FILE))
       FileUtils.mkdir_p(File.dirname(USER_TOKEN_FILE))
       ytq_param         = YtqParam.first
       if (!ytq_param.nil?)
@@ -195,7 +196,7 @@ class YoutubeQueue
 
   def authorize
     init_authorize
-
+byebug
     if @credentials.nil? 
       #url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
       url = @authorizer.get_authorization_url(base_url: URI.join(@env_redirect_uri, "set_token").to_s)
