@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_03_234723) do
-
+ActiveRecord::Schema[7.2].define(version: 2026_04_03_112521) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,17 +20,16 @@ ActiveRecord::Schema.define(version: 2019_11_03_234723) do
     t.string "subscription"
     t.string "channel"
     t.boolean "watched"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.date "published"
     t.index ["channel", "title"], name: "index_videos_on_channel_and_title", unique: true
   end
 
   create_table "ytq_params", force: :cascade do |t|
     t.string "last_date"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.binary "fileContents"
   end
-
 end
