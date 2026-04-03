@@ -196,7 +196,7 @@ class YoutubeQueue
 
   def authorize
     init_authorize
-byebug
+#byebug
     if @credentials.nil? 
       #url = @authorizer.get_authorization_url(base_url: REDIRECT_URI)
       url = @authorizer.get_authorization_url(base_url: URI.join(@env_redirect_uri, "set_token").to_s)
