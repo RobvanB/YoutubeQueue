@@ -4,11 +4,11 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '~> 3.4.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
-gem 'rails', '~> 6.1.3'
+gem 'rails', '~> 7.2'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
-gem 'puma', '~> 5.6'
+gem 'puma', '~> 6'
 # Use SCSS for stylesheets
 gem 'sass-rails', '>= 6'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
@@ -70,3 +70,4 @@ gem 'bigdecimal'
 gem 'benchmark'
 gem 'sassc'
 gem 'sass'
+gem 'rdoc', '~> 7.2'
