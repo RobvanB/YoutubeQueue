@@ -211,7 +211,7 @@ GEM
       date
       stringio
     public_suffix (7.0.5)
-    puma (6.6.1)
+    puma (7.2.1)
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.2.7)
@@ -355,7 +355,7 @@ DEPENDENCIES
   mutex_m
   pg (~> 1.1)
   pstore
-  puma (~> 6)
+  puma (~> 7)
   rack-mini-profiler (~> 2.0)
   rails (~> 7.2)
   rdoc (~> 7.2)
