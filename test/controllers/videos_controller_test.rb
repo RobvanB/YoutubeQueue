@@ -8,6 +8,9 @@ class VideosControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get videos_url
     assert_response :success
+    # Copilot-authored: Verify the bulk-delete action is available from the navigation.
+    assert_select 'a[data-method="delete"][href=?]', delete_watched_videos_path
+    # End Copilot-authored section.
   end
 
   test "should get new" do
@@ -45,4 +48,20 @@ class VideosControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to videos_url
   end
+
+  # Copilot-authored: Verify the bulk action removes only watched records and reports both counts.
+  test "should delete watched videos and report remaining count" do
+    watched_video = videos(:one)
+    watched_video.update!(watched: true)
+
+    assert_difference('Video.count', -1) do
+      delete delete_watched_videos_url
+    end
+
+    assert_redirected_to videos_url
+    assert_equal 'Deleted 1 watched videos; 1 videos remain.', flash[:notice]
+    assert_not Video.exists?(watched_video.id)
+    assert Video.where(watched: false).exists?
+  end
+  # End Copilot-authored section.
 end

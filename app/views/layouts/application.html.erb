@@ -33,6 +33,9 @@
             <li><%= link_to 'Home', videos_path %></li>
             <li><%= link_to 'Load latest videos', pull_path %></li>
             <li><%= link_to 'Check/set last date', ytq_params_path %></li>
+            <!-- Copilot-authored: Submit the bulk deletion as DELETE and confirm before removing records. -->
+            <li><%= link_to 'Delete watched videos', delete_watched_videos_path, method: :delete, data: { confirm: 'Delete all videos marked as watched?' } %></li>
+            <!-- End Copilot-authored section. -->
           </ul>
         </nav>
       </div>

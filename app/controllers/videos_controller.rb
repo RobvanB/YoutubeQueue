@@ -72,6 +72,16 @@ class VideosController < ApplicationController
     end
   end
 
+  # Copilot-authored: Delete only explicitly watched videos and report the resulting totals.
+  def delete_watched
+    deleted_count = Video.where(watched: true).delete_all
+    remaining_count = Video.count
+
+    redirect_to videos_path,
+      notice: "Deleted #{deleted_count} watched videos; #{remaining_count} videos remain."
+  end
+  # End Copilot-authored section.
+
   # Store / pass in last filter values from grid
   def set_filter
   #  byebug

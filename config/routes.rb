@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
  resources :ytq_params
+  # Copilot-authored: Keep the static bulk-delete path ahead of the videos/:id route.
+  delete 'videos/delete_watched', to: 'videos#delete_watched', as: :delete_watched_videos
+  # End Copilot-authored section.
   resources :videos
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
