@@ -1,3 +1,341 @@
-// Place all the styles related to the videos controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+// Copilot-authored: Begin video library UI styles.
+.site-header {
+  background: #20232b;
+  box-shadow: 0 3px 14px rgba(20, 24, 32, 0.16);
+}
+
+.site-header__inner {
+  display: flex;
+  width: calc(100% - 48px);
+  max-width: 1240px;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 auto;
+}
+
+.brand {
+  flex: 0 0 auto;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.brand:hover {
+  color: #fff;
+  background: transparent;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.site-nav__link {
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: #c1c5ce;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.site-nav__link:hover, .site-nav__link.is-active {
+  background: #343842;
+  color: #fff;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.button:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.button--compact {
+  min-height: 30px;
+  padding: 0 9px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.button--danger {
+  background: #cf343b;
+  color: #fff;
+}
+
+.button--danger:hover {
+  background: #b9272e;
+  color: #fff;
+}
+
+.page-shell {
+  width: calc(100% - 48px);
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 36px 0 52px;
+}
+
+.page-shell > h1, .video-library > h1 {
+  margin: 0 0 22px;
+  color: #252933;
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+
+.flash-message {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border: 1px solid #bee3cd;
+  border-radius: 9px;
+  background: #eaf7ef;
+  color: #24633d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.flash-message--alert {
+  border-color: #efc3c5;
+  background: #fff0f0;
+  color: #9f2429;
+}
+
+.library-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 250px) 130px;
+  gap: 11px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #e1e4ea;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(28, 33, 43, 0.04);
+}
+
+.search-field input, .select-field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d9dde5;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #323741;
+  font-size: 13px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.search-field input::placeholder {
+  color: #969ca7;
+}
+
+.search-field input:focus, .select-field select:focus {
+  border-color: #7898ce;
+  box-shadow: 0 0 0 3px rgba(66, 112, 184, 0.13);
+}
+
+.video-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e0e3e9;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 11px rgba(28, 33, 43, 0.045);
+}
+
+.video-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.video-table th {
+  padding: 11px 13px;
+  background: #f2f4f7;
+  color: #656b76;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.video-table td {
+  padding: 9px 13px;
+  color: #454a54;
+  vertical-align: middle;
+}
+
+.video-table tbody tr {
+  transition: background-color 120ms ease;
+}
+
+.video-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.video-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.video-table__channel {
+  max-width: 180px;
+  overflow: hidden;
+  color: #426db0;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-table__title {
+  max-width: 460px;
+  overflow: hidden;
+  color: #292d36;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button--watch {
+  background: #cf343b;
+  color: #fff;
+}
+
+.button--watch:hover {
+  background: #b9272e;
+  color: #fff;
+}
+
+.button--watched {
+  border-color: #d7e2f1;
+  background: #eef4fb;
+  color: #365f99;
+}
+
+.button--watched:hover {
+  border-color: #c3d4e9;
+  background: #e1ecf8;
+  color: #294d80;
+}
+
+.button--edit {
+  border-color: #e0e3e8;
+  background: #f7f8fa;
+  color: #5b616c;
+}
+
+.button--edit:hover {
+  border-color: #cbd0d9;
+  background: #eef0f4;
+  color: #353a44;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-badge--yes {
+  background: #e8f5ec;
+  color: #39744c;
+}
+
+.status-badge--no {
+  background: #f0f1f4;
+  color: #646a75;
+}
+
+.video-library > p {
+  margin: 24px 0 0;
+  color: #7c828d;
+  font-size: 12px;
+}
+
+.video-library > p a {
+  color: #426db0;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 680px) {
+  .site-header__inner, .page-shell {
+    width: calc(100% - 32px);
+  }
+
+  .site-header__inner {
+    min-height: 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px 18px;
+    padding: 14px 0;
+  }
+
+  .site-nav {
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+
+  .site-nav__link {
+    padding: 8px 9px;
+    font-size: 11px;
+  }
+
+  .site-nav .button {
+    min-height: 33px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .page-shell {
+    padding-top: 26px;
+  }
+
+  .library-filters {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+  }
+
+  .search-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 460px) {
+  .site-nav {
+    width: 100%;
+  }
+
+}
+// Copilot-authored: End video library UI styles.

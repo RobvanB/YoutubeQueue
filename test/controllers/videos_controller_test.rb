@@ -8,10 +8,39 @@ class VideosControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get videos_url
     assert_response :success
+    # Copilot-authored: Begin video library rendering assertions.
+    assert_select '[data-video-library]'
+    assert_select ".video-table tbody tr[data-video-card]", count: 2
+    assert_select '[data-watched-filter] option[selected]', text: "No"
+    assert_select 'a[href=?]', set_watched_path(@video)
+    # Copilot-authored: End video library rendering assertions.
     # Copilot-authored: Verify the bulk-delete action is available from the navigation.
     assert_select 'a[data-method="delete"][href=?]', delete_watched_videos_path
     # End Copilot-authored section.
   end
+
+  # Copilot-authored: Begin filter persistence and video ordering tests.
+  test "should preserve channel and watched filters" do
+    @video.update!(channel: "Example channel")
+
+    post save_video_filter_url, params: { channel: "Example channel", watched: "watched" }
+    assert_response :no_content
+
+    get videos_url
+    assert_select '[data-channel-filter] option[selected]', text: "Example channel"
+    assert_select '[data-watched-filter] option[selected]', text: "Yes"
+  end
+
+  test "should list videos from oldest to newest" do
+    videos(:one).update!(title: "Older video", published: Date.new(2020, 1, 1))
+    videos(:two).update!(title: "Newer video", published: Date.new(2021, 1, 1))
+
+    get videos_url
+
+    assert_response :success
+    assert_operator response.body.index("Older video"), :<, response.body.index("Newer video")
+  end
+  # Copilot-authored: End filter persistence and video ordering tests.
 
   test "should get new" do
     get new_video_url

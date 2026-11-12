@@ -7,6 +7,8 @@ class YoutubeQueue
   require 'googleauth/stores/file_token_store'
   require 'fileutils'
   require 'json'
+  # Copilot-authored: Begin timestamp and video sync changes.
+  require 'time'
 
   # VALID REDIRECT_URI FOR YOUR CLIENT
   #REDIRECT_URI        = 'http://localhost:3000/set_token'
@@ -25,10 +27,10 @@ class YoutubeQueue
     @service = Google::Apis::YoutubeV3::YouTubeService.new
     @service.client_options.application_name = APPLICATION_NAME
     #@service.authorization = authorize
-    time = Time.now.utc 
-    @new_lastcheck_date = time.year.to_s + "-" + time.month.to_s + "-" + time.day.to_s + "T" + time.hour.to_s + ":" +
-      time.min.to_s + ":00Z" #Format: '2018-08-10T00:00:00Z'
+    @new_lastcheck_date = Time.now.utc.strftime("%Y-%m-%dT%H:%M:00Z")
     @vid_counter = 0
+    @found_counter = 0
+    @duplicate_counter = 0
     @sub_counter = 0
   end
 
@@ -36,29 +38,25 @@ class YoutubeQueue
     @service.authorization = credentials
     # Get the last time the videos were pulled
     ytq_param = YtqParam.first  # There will be/should be only 1 record
-    if ytq_param.nil? || ytq_param.last_date.nil?
+    if ytq_param.nil? || ytq_param.last_date.blank?
       last_check_date = '2018-08-10T00:00:00Z'  #'2018-08-10T00:00:00Z' Initial start date
     else
-      last_check_date = ytq_param.last_date
+      last_check_date = Time.parse(ytq_param.last_date).utc.strftime("%Y-%m-%dT%H:%M:%SZ")
     end
     #byebug
     #Do the seach for each channel I'm subscribed to
     
-    resp = get_subscriptions
+    subscriptions = get_subscriptions
 
-    if resp.is_a?(Hash) && !resp[:type].nil? && (resp[:type] == "error")
-      raise  resp
+    if subscriptions.is_a?(Hash) && subscriptions[:type] == "error"
+      return subscriptions
     end
 
+    @sub_counter = subscriptions.length
     len_array = %w[medium long]
     len_array.each do |len|
-      @my_subscriptions.items.each do | sub |
+      subscriptions.each do | sub |
         sub_channel_id    = sub.snippet.resource_id.channel_id
-        sub_channel_title = sub.snippet.title
-      
-        #puts sub_channel_title
-        #puts sub_channel_id
-        @sub_counter += 1
         #byebug
         # Ignore stupid ass shorts. videoType 'episode' does not work.
         # So we will just pull the 'medium' and 'long' videos
@@ -79,33 +77,32 @@ class YoutubeQueue
 
     	#byebug
       	# @new_videos.items[0].snippet.title 
-        unless new_videos.nil?
-          new_videos.items.each do | item |
-              @channel_id     = item.snippet.channel_id
-              @channel_title  = item.snippet.channel_title
-              @video_desc     = item.snippet.description
-              @published_at   = item.snippet.published_at
-              @title          = item.snippet.title
-              @video_id       = item.id.video_id
-              @kind           = item.id.kind
+        if new_videos.is_a?(Hash) && new_videos[:type] == "error"
+          return new_videos
+        end
 
-              #puts @channel_id
-              #puts @channel_title
-              
-              if @kind.eql? 'youtube#video'
-                @video            = Video.new
-                @video.channel    = @channel_title
-                @video.title      = @title
-                @video.url        = "https://www.youtube.com/watch?v="+ @video_id
-                @video.published  = @published_at
-                begin
-                  @video.save
-                  @vid_counter += 1
-                rescue ActiveRecord::StatementInvalid => e
-                  # Handle duplicates (i.e. ignore)
-                  raise e unless e = ActiveRecord::RecordNotUnique
-              end
-            end
+        Array(new_videos&.items).each do | item |
+          next unless item.id&.kind == "youtube#video"
+
+          @found_counter += 1
+          video = Video.find_or_initialize_by(
+            channel: item.snippet.channel_title,
+            title: item.snippet.title
+          )
+
+          if video.persisted?
+            @duplicate_counter += 1
+            next
+          end
+
+          video.url = "https://www.youtube.com/watch?v=#{item.id.video_id}"
+          video.published = item.snippet.published_at
+
+          begin
+            video.save!
+            @vid_counter += 1
+          rescue ActiveRecord::RecordNotUnique
+            @duplicate_counter += 1
           end
         end
       end
@@ -121,21 +118,41 @@ class YoutubeQueue
       ytq_param.save
     end
 
-    counts = Hash["vid_count" => @vid_counter, "sub_count" => @sub_counter]
-    return counts
+    {
+      "vid_count" => @vid_counter,
+      "found_count" => @found_counter,
+      "duplicate_count" => @duplicate_counter,
+      "sub_count" => @sub_counter
+    }
 
-    rescue Exception => ex
-      return resp
+  rescue StandardError => ex
+    Rails.logger.error("YoutubeQueue#get_videos failed: #{ex.class}: #{ex.message}")
+    { type: "error", msg: "Unable to load videos from YouTube: #{ex.message}" }
   end
+  # Copilot-authored: End timestamp and video sync changes.
 
+  # Copilot-authored: Begin paginated subscription loading.
   def get_subscriptions
-    #@my_channel_id = 'UCvQQkj0g7xL21tf5Fo6Ogvg'
-#byebug
-    @my_subscriptions = @service.list_subscriptions('snippet,contentDetails', mine: true, max_results: 50)
-    
-    rescue Exception => ex
-      return {:type => "error", :msg => "Error with Google API: #{ex.message}"}
+    subscriptions = []
+    page_token = nil
+
+    loop do
+      response = @service.list_subscriptions(
+        'snippet,contentDetails',
+        mine: true,
+        max_results: 50,
+        page_token: page_token
+      )
+      subscriptions.concat(Array(response.items))
+      page_token = response.next_page_token
+      break if page_token.blank?
+    end
+
+    subscriptions
+  rescue StandardError => ex
+    { type: "error", msg: "Error with Google API: #{ex.message}" }
   end
+  # Copilot-authored: End paginated subscription loading.
 
   def init_authorize
 #byebug
@@ -253,8 +270,10 @@ class YoutubeQueue
     #                    published_after: published_after)
     service.list_searches(part, channel_id: channel_id, max_results: max_results, 
                         published_after: published_after, type: type, video_duration: videoDuration)
-  rescue Exception => ex
+  # Copilot-authored: Begin API search error handling.
+  rescue StandardError => ex
     return {:type => "error", :msg => "Error with Google API: #{ex.message}"}
+  # Copilot-authored: End API search error handling.
 
   end   
 

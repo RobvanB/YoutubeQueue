@@ -11,17 +11,20 @@ Rails.application.routes.draw do
   #get 'video/index'
   #root 'videos#index'
 
-  # Below replaces the above so that dhtmlxgrid can be used
+  # Copilot-authored: Begin routes for the updated video UI.
+  # Routes retained for the existing video-data endpoint and integrations.
   Youtubequeue::Application.routes.draw do
     root :to => "videos#index"
     match "video/data", :to => "videos#data", :as => "data", :via => "get"
 
     get 'pull', to: 'videos#pull', as: :pull
 
-    get 'set_watched/:id', to: 'videos#set_watched'
+    get 'set_watched/:id', to: 'videos#set_watched', as: :set_watched
+    post 'set_filter', to: 'videos#save_filter', as: :save_video_filter
 
     get 'oauth2callback', to: 'videos#set_token'
 
     get 'set_filter/:filter', to: 'videos#set_filter'
   end
+  # Copilot-authored: End routes for the updated video UI.
 end

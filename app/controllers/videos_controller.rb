@@ -22,14 +22,23 @@ class VideosController < ApplicationController
       flash.discard
       counters = YoutubeQueue.new.get_videos(credentials)
 
-      if counters.is_a?(Hash) && !counters[:type].nil? &&  counters[:type] == "error"
+      # Copilot-authored: Begin video sync result handling.
+      if counters.is_a?(Hash) && counters[:type] == "error"
         flash[:alert] = counters[:msg]
         redirect_to videos_path
         return
       end
+
+      unless counters.is_a?(Hash) && counters.key?("vid_count") && counters.key?("sub_count")
+        Rails.logger.error("Unexpected response from YoutubeQueue#get_videos: #{counters.class}")
+        flash[:alert] = "Unable to load videos from YouTube."
+        redirect_to videos_path
+        return
+      end
       
-      flash[:notice] = "Updated " + counters['vid_count'].to_s + " videos from " + 
-                                  counters['sub_count'].to_s + " subscriptions."
+      flash[:notice] = "Found #{counters['found_count']} videos from #{counters['sub_count']} subscriptions; " \
+                       "added #{counters['vid_count']} new, skipped #{counters['duplicate_count']} duplicates."
+      # Copilot-authored: End video sync result handling.
      
       @videos = Video.all
       redirect_to videos_path
@@ -93,6 +102,14 @@ class VideosController < ApplicationController
     session[:channel] = channel
     session[:watched] = watched
   end
+
+  # Copilot-authored: Begin saved video filter action.
+  def save_filter
+    session[:channel] = params[:channel].presence || "EMPTY"
+    session[:watched] = params[:watched].presence || "all"
+    head :no_content
+  end
+  # Copilot-authored: End saved video filter action.
   
   def get_subscriptions
     @my_scubscriptions = YoutubeQueue.new.get_subscriptions
@@ -101,11 +118,18 @@ class VideosController < ApplicationController
   # GET /videos
   # GET /videos.json
   def index
-    @videos = Video.all
-    channel = session[:channel]
-    watched = session[:watched]
-    gon.channel = channel
-    gon.watched = watched
+    # Copilot-authored: Begin video list ordering and filter defaults.
+    @videos = Video.order(published: :asc, id: :asc)
+    @channels = @videos.map(&:channel).compact_blank.uniq.sort
+    @selected_channel = session[:channel]
+    @selected_channel = nil if @selected_channel.blank? || @selected_channel == "EMPTY"
+    @selected_watched = case session[:watched]
+                        when "Yes", "watched" then "watched"
+                        when "No", "unwatched" then "unwatched"
+                        when "all" then "all"
+                        else "unwatched"
+                        end
+    # Copilot-authored: End video list ordering and filter defaults.
     #byebug
   end
 

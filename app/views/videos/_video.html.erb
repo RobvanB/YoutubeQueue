@@ -1,0 +1,21 @@
+<%# Copilot-authored: Begin compact video row. %>
+<% watch_url = youtube_video_url(video.url) %>
+<tr
+  data-video-card
+  data-title="<%= video.title.to_s.downcase %>"
+  data-channel="<%= video.channel.to_s.downcase %>"
+  data-watched="<%= video.watched? %>"
+>
+  <td class="video-table__channel"><%= video.channel %></td>
+  <td><%= video.published&.strftime("%b %d, %Y") %></td>
+  <td class="video-table__title"><%= video.title %></td>
+  <td>
+    <% if watch_url %>
+      <%= link_to "Watch", watch_url, target: "_blank", rel: "noopener noreferrer", class: "button button--watch button--compact" %>
+    <% end %>
+  </td>
+  <td><span class="status-badge <%= video.watched? ? 'status-badge--yes' : 'status-badge--no' %>"><%= video.watched? ? "Yes" : "No" %></span></td>
+  <td><%= link_to "Set Watched", set_watched_path(video), class: "button button--watched button--compact" %></td>
+  <td><%= link_to "Edit", edit_video_path(video), class: "button button--edit button--compact" %></td>
+</tr>
+<%# Copilot-authored: End compact video row. %>
