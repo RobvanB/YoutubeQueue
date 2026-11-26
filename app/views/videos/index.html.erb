@@ -2,7 +2,16 @@
 <% provide(:title, "Videos") %>
 
 <section class="video-library" data-video-library data-save-filter-url="<%= save_video_filter_path %>">
-  <h1>Videos</h1>
+  <%# Copilot-authored: Begin video count summary. %>
+  <div class="video-library__header">
+    <h1>Videos</h1>
+    <ul class="video-counts" aria-label="Video counts">
+      <li><span>Videos</span><strong data-video-count="total"><%= @video_count %></strong></li>
+      <li><span>unwatched</span><strong data-video-count="unwatched"><%= @unwatched_count %></strong></li>
+      <li><span>watched</span><strong data-video-count="watched"><%= @watched_count %></strong></li>
+    </ul>
+  </div>
+  <%# Copilot-authored: End video count summary. %>
 
   <div class="library-filters" role="search">
     <label class="search-field">

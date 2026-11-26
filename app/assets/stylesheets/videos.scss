@@ -92,13 +92,53 @@
   padding: 36px 0 52px;
 }
 
-.page-shell > h1, .video-library > h1 {
+// Copilot-authored: Begin video count header styles.
+.page-shell > h1, .video-library > h1, .video-library__header h1 {
   margin: 0 0 22px;
   color: #252933;
   font-size: 28px;
   font-weight: 750;
   letter-spacing: -0.045em;
 }
+
+.video-library__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.video-library__header h1 {
+  margin: 0;
+}
+
+.video-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.video-counts li {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid #e1e4ea;
+  border-radius: 8px;
+  background: #fff;
+  color: #626978;
+  font-size: 12px;
+}
+
+.video-counts strong {
+  color: #252933;
+  font-size: 15px;
+}
+// Copilot-authored: End video count header styles.
 
 .flash-message {
   margin-bottom: 20px;
@@ -321,6 +361,14 @@
   .page-shell {
     padding-top: 26px;
   }
+
+  // Copilot-authored: Begin responsive video count header styles.
+  .video-library__header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  // Copilot-authored: End responsive video count header styles.
 
   .library-filters {
     grid-template-columns: 1fr 1fr;

@@ -13,11 +13,27 @@ class VideosControllerTest < ActionDispatch::IntegrationTest
     assert_select ".video-table tbody tr[data-video-card]", count: 2
     assert_select '[data-watched-filter] option[selected]', text: "No"
     assert_select 'a[href=?]', set_watched_path(@video)
+    assert_select '[data-video-count="total"]', text: "2"
+    assert_select '[data-video-count="unwatched"]', text: "2"
+    assert_select '[data-video-count="watched"]', text: "0"
     # Copilot-authored: End video library rendering assertions.
     # Copilot-authored: Verify the bulk-delete action is available from the navigation.
     assert_select 'a[data-method="delete"][href=?]', delete_watched_videos_path
     # End Copilot-authored section.
   end
+
+  # Copilot-authored: Begin video count tests.
+  test "should show separate watched and unwatched counts" do
+    videos(:one).update!(watched: true)
+
+    get videos_url
+
+    assert_response :success
+    assert_select '[data-video-count="total"]', text: "2"
+    assert_select '[data-video-count="unwatched"]', text: "1"
+    assert_select '[data-video-count="watched"]', text: "1"
+  end
+  # Copilot-authored: End video count tests.
 
   # Copilot-authored: Begin filter persistence and video ordering tests.
   test "should preserve channel and watched filters" do

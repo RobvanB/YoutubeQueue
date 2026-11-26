@@ -121,6 +121,11 @@ class VideosController < ApplicationController
     # Copilot-authored: Begin video list ordering and filter defaults.
     @videos = Video.order(published: :asc, id: :asc)
     @channels = @videos.map(&:channel).compact_blank.uniq.sort
+    # Copilot-authored: Begin video status counts.
+    @video_count = @videos.size
+    @watched_count = @videos.count(&:watched?)
+    @unwatched_count = @videos.count { |video| video.watched == false }
+    # Copilot-authored: End video status counts.
     @selected_channel = session[:channel]
     @selected_channel = nil if @selected_channel.blank? || @selected_channel == "EMPTY"
     @selected_watched = case session[:watched]
