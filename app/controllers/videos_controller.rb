@@ -35,6 +35,10 @@ class VideosController < ApplicationController
         redirect_to videos_path
         return
       end
+
+      # Copilot-authored: Begin cached subscription count update.
+      session[:subscription_count] = counters["sub_count"]
+      # Copilot-authored: End cached subscription count update.
       
       flash[:notice] = "Found #{counters['found_count']} videos from #{counters['sub_count']} subscriptions; " \
                        "added #{counters['vid_count']} new, skipped #{counters['duplicate_count']} duplicates."
@@ -124,8 +128,11 @@ class VideosController < ApplicationController
     # Copilot-authored: Begin video status counts.
     @video_count = @videos.size
     @watched_count = @videos.count(&:watched?)
-    @unwatched_count = @videos.count { |video| video.watched == false }
+    @unwatched_count = @videos.count { |video| !video.watched? }
     # Copilot-authored: End video status counts.
+    # Copilot-authored: Begin subscription count from the last pull.
+    @subscription_count = session[:subscription_count]
+    # Copilot-authored: End subscription count from the last pull.
     @selected_channel = session[:channel]
     @selected_channel = nil if @selected_channel.blank? || @selected_channel == "EMPTY"
     @selected_watched = case session[:watched]

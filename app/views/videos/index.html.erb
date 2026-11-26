@@ -9,6 +9,7 @@
       <li><span>Videos</span><strong data-video-count="total"><%= @video_count %></strong></li>
       <li><span>unwatched</span><strong data-video-count="unwatched"><%= @unwatched_count %></strong></li>
       <li><span>watched</span><strong data-video-count="watched"><%= @watched_count %></strong></li>
+      <li><span>subscriptions</span><strong data-video-count="subscriptions"><%= @subscription_count.nil? ? "Not synced" : @subscription_count %></strong></li>
     </ul>
   </div>
   <%# Copilot-authored: End video count summary. %>

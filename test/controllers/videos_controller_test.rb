@@ -16,6 +16,7 @@ class VideosControllerTest < ActionDispatch::IntegrationTest
     assert_select '[data-video-count="total"]', text: "2"
     assert_select '[data-video-count="unwatched"]', text: "2"
     assert_select '[data-video-count="watched"]', text: "0"
+    assert_select '[data-video-count="subscriptions"]', text: "Not synced"
     # Copilot-authored: End video library rendering assertions.
     # Copilot-authored: Verify the bulk-delete action is available from the navigation.
     assert_select 'a[data-method="delete"][href=?]', delete_watched_videos_path
@@ -34,6 +35,46 @@ class VideosControllerTest < ActionDispatch::IntegrationTest
     assert_select '[data-video-count="watched"]', text: "1"
   end
   # Copilot-authored: End video count tests.
+
+  # Copilot-authored: Begin unset watched status count test.
+  test "counts videos with unset watched status as unwatched" do
+    videos(:one).update!(watched: nil)
+    videos(:two).update!(watched: nil)
+
+    get videos_url
+
+    assert_response :success
+    assert_select '[data-video-count="total"]', text: "2"
+    assert_select '[data-video-count="unwatched"]', text: "2"
+    assert_select '[data-video-count="watched"]', text: "0"
+  end
+  # Copilot-authored: End unset watched status count test.
+
+  # Copilot-authored: Begin subscription count session tests.
+  test "pull stores the subscription count for subsequent page loads" do
+    queue = Object.new
+    queue.define_singleton_method(:authorize) { { credentials: :test } }
+    queue.define_singleton_method(:get_videos) do |_credentials|
+      {
+        "vid_count" => 1,
+        "found_count" => 1,
+        "duplicate_count" => 0,
+        "sub_count" => 7
+      }
+    end
+
+    YoutubeQueue.define_singleton_method(:new) { queue }
+    begin
+      get pull_path
+    ensure
+      YoutubeQueue.singleton_class.send(:remove_method, :new)
+    end
+
+    assert_redirected_to videos_path
+    follow_redirect!
+    assert_select '[data-video-count="subscriptions"]', text: "7"
+  end
+  # Copilot-authored: End subscription count session tests.
 
   # Copilot-authored: Begin filter persistence and video ordering tests.
   test "should preserve channel and watched filters" do
